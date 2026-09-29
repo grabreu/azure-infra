@@ -41,6 +41,7 @@ resource ingestionAlert 'Microsoft.Insights/scheduledQueryRules@2026-03-01' = {
         {
           query: 'Usage | where IsBillable | summarize DataGB = sum(Quantity / 1000)'
           timeAggregation: 'Total'
+          metricMeasureColumn: 'DataGB'
           operator: 'GreaterThanOrEqual'
           threshold: 4
         }
