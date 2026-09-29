@@ -48,6 +48,7 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 - `main.bicepparam` - parameter values for `main.bicep` (no secrets; the SQL admin's Entra login/object ID are identifiers, not credentials).
 - `modules/` - one Bicep file per resource type (`cae.bicep`, `sql.bicep`, `alerts.bicep`); `cae.bicep` also creates the Log Analytics workspace it depends on.
 - `docs/adr/` - significant, hard-to-reverse decisions.
+- `docs/bootstrap-project-identity.md` - how to create a project's CD identity, role assignments, federated credential, and SQL grants; repeated for every new project.
 
 ### Validation
 
