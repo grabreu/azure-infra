@@ -66,7 +66,11 @@ ALTER ROLE db_datawriter ADD MEMBER [ca-<project>-api-prod];
 
 CREATE USER [caj-<project>-migration-prod] FROM EXTERNAL PROVIDER;
 ALTER ROLE db_ddladmin ADD MEMBER [caj-<project>-migration-prod];
+ALTER ROLE db_datareader ADD MEMBER [caj-<project>-migration-prod];
+ALTER ROLE db_datawriter ADD MEMBER [caj-<project>-migration-prod];
 ```
+
+`db_ddladmin` alone applies schema changes but can't read or write `__EFMigrationsHistory`, which EF Core needs to track which migrations already ran; confirmed the hard way, `dotnet ef migrations bundle` fails with "The SELECT permission was denied on the object '__EFMigrationsHistory'" without `db_datareader`/`db_datawriter` too.
 
 `FROM EXTERNAL PROVIDER` resolves by name against Entra ID; no object ID needed in the statement. To confirm a grant matches the identity you expect:
 
