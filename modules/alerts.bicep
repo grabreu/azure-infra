@@ -35,11 +35,11 @@ resource ingestionAlert 'Microsoft.Insights/scheduledQueryRules@2026-03-01' = {
       logAnalyticsWorkspaceId
     ]
     evaluationFrequency: 'P1D'
-    windowSize: 'P30D'
+    windowSize: 'P1D'
     criteria: {
       allOf: [
         {
-          query: 'Usage | where IsBillable | summarize DataGB = sum(Quantity / 1000)'
+          query: 'Usage | where TimeGenerated > ago(30d) | where IsBillable | summarize DataGB = sum(Quantity / 1000)'
           timeAggregation: 'Total'
           metricMeasureColumn: 'DataGB'
           operator: 'GreaterThanOrEqual'
