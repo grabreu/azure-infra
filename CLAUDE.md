@@ -51,11 +51,10 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 
 ### Validation
 
-TODO: no CI yet. `az deployment sub what-if --location brazilsouth --template-file main.bicep --parameters main.bicepparam` previews changes before applying; run it before `az deployment sub create` with the same arguments.
+CI (`.github/workflows/ci.yml`) runs `az bicep build` on `main.bicep`, each file in `modules/`, and `az bicep build-params` on `main.bicepparam`, on push/PR to `main`. It only validates; it doesn't apply anything. Before applying, run `az deployment sub what-if --location brazilsouth --template-file main.bicep --parameters main.bicepparam`; it previews changes without making them. Then `az deployment sub create` with the same arguments.
 
 ### Open Questions
 
-- TODO: CI validating the Bicep (build/lint) not set up.
 - TODO: how a consuming repo's `infra/` references this repo's resources (`existing` resource IDs passed as parameters, or a documented lookup convention) is not decided yet.
 - TODO: the old, manually created `rg-shared-prod-brs` (and everything in it, including `product-catalog`'s resources) is being abandoned in favor of `rg-shared-prod`, which this repo now provisions and has been applied; `product-catalog` still needs to be migrated separately, and the old resource group deleted once nothing depends on it.
 - TODO: no cost alert on `log-shared-prod`; unlike the SQL Database and Container Apps free tiers, Log Analytics ingestion past the free 5 GB/month (per billing account, not per workspace) just starts billing, it doesn't pause.

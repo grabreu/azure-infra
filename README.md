@@ -1,5 +1,6 @@
 # azure-infra
 
+[![CI](https://github.com/grabreu/azure-infra/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/grabreu/azure-infra/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/grabreu/azure-infra?style=flat-square)](LICENSE)
 
 Shared Azure infrastructure (Bicep) for my projects: resource group, Container Apps environment, SQL Server, reused across multiple projects instead of provisioned per project.
@@ -33,7 +34,7 @@ Always run `what-if` first; it previews what would change without applying anyth
 
 ## Deployment
 
-TODO: no CI/CD set up yet; applied by hand for now.
+CI (`.github/workflows/ci.yml`) validates the Bicep (`az bicep build`) on every PR and push to `main`; it doesn't apply anything. No CD: applying is manual, see Development above.
 
 ## License
 
