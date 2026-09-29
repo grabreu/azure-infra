@@ -11,7 +11,7 @@ Bicep · Azure CLI
 
 ## Why
 
-Several of my projects (`shared-todo`, `product-catalog`, ...) share the same Container Apps environment and SQL Server, provisioned by hand so far. That led to drift between projects: deprecated CLI flags, inconsistent resource names, no single source of truth for what exists. This repo makes the shared provisioning reproducible and versioned, instead of re-derived from memory or shell history each time.
+Several of my projects (`shared-todo`, ...) share the same Container Apps environment and SQL Server, provisioned by hand so far. That led to drift between projects: deprecated CLI flags, inconsistent resource names, no single source of truth for what exists. This repo makes the shared provisioning reproducible and versioned, instead of re-derived from memory or shell history each time.
 
 ## What this provisions
 
