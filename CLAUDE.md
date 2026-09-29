@@ -2,7 +2,7 @@
 
 ## Repository
 
-Shared Azure infrastructure (Bicep) for my projects: resource group, Container Apps environment, SQL Server, and other resources reused across multiple projects (`shared-todo`, `product-catalog`, future ones). Per-project resources (an app's own Container App, Container Apps Job, database, Static Web App) are not provisioned here; they live in each app repo's own `infra/` folder, referencing what this repo provisions.
+Shared Azure infrastructure (Bicep) for my projects: resource group, Container Apps environment, SQL Server, and other resources reused across multiple projects (`shared-todo`, future ones). Per-project resources (an app's own Container App, Container Apps Job, database, Static Web App) are not provisioned here; they live in each app repo's own `infra/` folder, referencing what this repo provisions.
 
 Read `README.md` before making changes: it documents what this repo provisions and how consuming repos reference it. Check `docs/adr/` before revisiting a past decision (Bicep over Terraform, the shared/per-project boundary, the naming convention, SQL Server auth).
 
@@ -54,6 +54,3 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 
 Run `az bicep build --file main.bicep` (also resolves `modules/`) and `az bicep build-params --file main.bicepparam` before considering a change done; CI (`.github/workflows/ci.yml`) runs the same on push/PR to `main`. Neither applies anything; see `README.md` for the deploy commands.
 
-### Open Questions
-
-- TODO: the old, manually created `rg-shared-prod-brs` (and everything in it, including `product-catalog`'s resources) is being abandoned in favor of `rg-shared-prod`, which this repo now provisions and has been applied; `product-catalog` still needs to be migrated separately, and the old resource group deleted once nothing depends on it.
