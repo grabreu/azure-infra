@@ -4,6 +4,10 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - "main.bicep"
+      - "main.bicepparam"
+      - "modules/**"
 
 permissions:
   contents: read
