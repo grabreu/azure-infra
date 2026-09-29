@@ -1,7 +1,6 @@
 # azure-infra
 
 [![CI](https://github.com/grabreu/azure-infra/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/grabreu/azure-infra/actions/workflows/ci.yml)
-[![What-If](https://github.com/grabreu/azure-infra/actions/workflows/what-if.yml/badge.svg?branch=main)](https://github.com/grabreu/azure-infra/actions/workflows/what-if.yml)
 [![License](https://img.shields.io/github/license/grabreu/azure-infra?style=flat-square)](LICENSE)
 
 Shared Azure infrastructure (Bicep) for my projects: resource group, Container Apps environment, SQL Server, reused across multiple projects instead of provisioned per project.
