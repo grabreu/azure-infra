@@ -18,6 +18,7 @@ Several of my projects (`shared-todo`, `product-catalog`, ...) share the same Co
 - Resource group
 - Container Apps environment (with its Log Analytics workspace)
 - SQL Server
+- An email alert when the Log Analytics workspace's billable ingestion approaches its free monthly allowance
 
 Per-project resources (a project's own Container App, Container Apps Job, database, Static Web App) are not provisioned here; each app repo owns its own `infra/`, referencing these as existing resources.
 
@@ -34,7 +35,7 @@ Always run `what-if` first; it previews what would change without applying anyth
 
 ## Deployment
 
-CI (`.github/workflows/ci.yml`) validates the Bicep (`az bicep build`) on every PR and push to `main`; it doesn't apply anything. No CD: applying is manual, see Development above.
+No CD; applying is manual, see Development above.
 
 ## License
 
