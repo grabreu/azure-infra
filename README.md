@@ -15,18 +15,25 @@ Several of my projects (`shared-todo`, `product-catalog`, ...) share the same Co
 ## What this provisions
 
 - Resource group
-- Container Apps environment
+- Container Apps environment (with its Log Analytics workspace)
 - SQL Server
 
 Per-project resources (a project's own Container App, Container Apps Job, database, Static Web App) are not provisioned here; each app repo owns its own `infra/`, referencing these as existing resources.
 
 ## Development
 
-TODO: no Bicep files yet; commands land once the first module does.
+Requires the Azure CLI, logged in (`az login`) with Contributor on the target subscription.
+
+```powershell
+az deployment sub what-if --location brazilsouth --template-file main.bicep --parameters main.bicepparam
+az deployment sub create --location brazilsouth --template-file main.bicep --parameters main.bicepparam
+```
+
+Always run `what-if` first; it previews what would change without applying anything.
 
 ## Deployment
 
-TODO: no CI/CD set up yet.
+TODO: no CI/CD set up yet; applied by hand for now.
 
 ## License
 

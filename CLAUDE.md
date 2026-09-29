@@ -4,7 +4,7 @@
 
 Shared Azure infrastructure (Bicep) for my projects: resource group, Container Apps environment, SQL Server, and other resources reused across multiple projects (`shared-todo`, `product-catalog`, future ones). Per-project resources (an app's own Container App, Container Apps Job, database, Static Web App) are not provisioned here; they live in each app repo's own `infra/` folder, referencing what this repo provisions.
 
-Read `README.md` before making changes: it documents what this repo provisions and how consuming repos reference it. `docs/architecture.md` (module layout) and `docs/adr/` (significant, hard-to-reverse decisions, e.g. Bicep over Terraform, the shared/per-project boundary) don't exist yet; add them once the first module lands, and check `docs/adr/` before revisiting a past decision from then on.
+Read `README.md` before making changes: it documents what this repo provisions and how consuming repos reference it. Check `docs/adr/` before revisiting a past decision (Bicep over Terraform, the shared/per-project boundary, the naming convention, SQL Server auth).
 
 ## General Rules
 
@@ -44,27 +44,18 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 
 ### Source
 
-- `main.bicep` - entry point, provisions the shared resources into the resource group. Not created yet.
-- `modules/` - reusable Bicep modules, one per resource type. Not created yet.
-
-### Naming convention
-
-`<caf-abbrev>-<app>[-<component>]-<env>[-<uniqueness-suffix>]`, no region segment.
-
-- `<caf-abbrev>`: the official Microsoft CAF abbreviation for the resource type (`ca`, `cae`, `caj`, `sql`, `sqldb`, `id`, ...).
-- `<app>`: `shared` for resources reused across projects (this repo's resources); the project slug for per-project resources (defined in that project's own `infra/`).
-- `[-<component>]`: only when the resource is not the whole product (e.g. `-api-` when a project has a separate frontend hosted elsewhere).
-- `<env>`: `prod` today; kept even with a single environment, since adding one later means recreating most Azure resource types.
-- `[-<uniqueness-suffix>]`: only for resources requiring global DNS uniqueness across all of Azure (e.g. the SQL Server's `-grabreu` suffix).
-
-Exception: the resource group (`rg-shared-prod-brs`) keeps its existing name; resource groups can't be renamed, so region stays in that one name as a historical artifact.
+- `main.bicep` - entry point (subscription scope): creates/adopts the resource group, calls each module scoped into it.
+- `main.bicepparam` - parameter values for `main.bicep` (no secrets; the SQL admin's Entra login/object ID are identifiers, not credentials).
+- `modules/` - one Bicep file per resource type (`cae.bicep`, `sql.bicep`); `cae.bicep` also creates the Log Analytics workspace it depends on.
+- `docs/adr/` - significant, hard-to-reverse decisions.
 
 ### Validation
 
-TODO: no Bicep files yet, no CI. Once `main.bicep` exists, this section documents `az bicep build`/`bicep lint` (or equivalent) and the CI workflow that runs them.
+TODO: no CI yet. `az deployment sub what-if --location brazilsouth --template-file main.bicep --parameters main.bicepparam` previews changes before applying; run it before `az deployment sub create` with the same arguments.
 
 ### Open Questions
 
-- TODO: first module (resource group contents: CAE, SQL Server) not written yet; those resources exist today from manual `az cli` creation and need to be imported/codified here.
 - TODO: CI validating the Bicep (build/lint) not set up.
 - TODO: how a consuming repo's `infra/` references this repo's resources (`existing` resource IDs passed as parameters, or a documented lookup convention) is not decided yet.
+- TODO: the old, manually created `rg-shared-prod-brs` (and everything in it, including `product-catalog`'s resources) is being abandoned in favor of `rg-shared-prod`, which this repo now provisions and has been applied; `product-catalog` still needs to be migrated separately, and the old resource group deleted once nothing depends on it.
+- TODO: no cost alert on `log-shared-prod`; unlike the SQL Database and Container Apps free tiers, Log Analytics ingestion past the free 5 GB/month (per billing account, not per workspace) just starts billing, it doesn't pause.
