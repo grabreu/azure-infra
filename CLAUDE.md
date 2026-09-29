@@ -2,7 +2,7 @@
 
 ## Repository
 
-Shared Azure infrastructure (Bicep) for the portfolio's app repos: resource group, Container Apps environment, SQL Server, and other resources reused across multiple projects (`shared-todo`, `product-catalog`, future ones). Per-project resources (an app's own Container App, Container Apps Job, database, Static Web App) are not provisioned here; they live in each app repo's own `infra/` folder, referencing what this repo provisions.
+Shared Azure infrastructure (Bicep) for my projects: resource group, Container Apps environment, SQL Server, and other resources reused across multiple projects (`shared-todo`, `product-catalog`, future ones). Per-project resources (an app's own Container App, Container Apps Job, database, Static Web App) are not provisioned here; they live in each app repo's own `infra/` folder, referencing what this repo provisions.
 
 Read `README.md` before making changes: it documents what this repo provisions and how consuming repos reference it. `docs/architecture.md` (module layout) and `docs/adr/` (significant, hard-to-reverse decisions, e.g. Bicep over Terraform, the shared/per-project boundary) don't exist yet; add them once the first module lands, and check `docs/adr/` before revisiting a past decision from then on.
 
