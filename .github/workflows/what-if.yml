@@ -1,0 +1,63 @@
+name: What-If
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+concurrency:
+  group: what-if-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  what-if:
+    name: What-If
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Azure login
+        uses: azure/login@2035af27c2cea8ff426397d10e3edb28906b51df # v2.3.1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run what-if
+        id: whatif
+        continue-on-error: true
+        run: |
+          {
+            echo 'result<<WHATIF_EOF'
+            az deployment sub what-if \
+              --location brazilsouth \
+              --template-file main.bicep \
+              --parameters main.bicepparam 2>&1
+            echo 'WHATIF_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment on PR
+        if: always()
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          WHATIF_OUTPUT: ${{ steps.whatif.outputs.result }}
+        with:
+          script: |
+            const body = "### Bicep what-if\n\n```\n" + process.env.WHATIF_OUTPUT + "\n```";
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
+
+      - name: Fail if what-if failed
+        if: steps.whatif.outcome == 'failure'
+        run: exit 1
