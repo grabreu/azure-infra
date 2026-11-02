@@ -1,81 +1,68 @@
-# Bootstrapping a project's CD identity and SQL access
+# Project bootstrap
 
-For a project repo (`shared-todo`, `product-catalog`, ...) whose CD updates its own Container App/Job and whose database is Entra-only, the CD identity and the SQL grants are created by hand, not by Bicep, same reasoning as this repo's own CI identity: see `docs/adr/0005-ci-identity-bootstrap-stays-manual.md`.
+Manual setup for a new project (`crew-tasks`, ...): CD identity, registry access, SQL grants. Replace `<project>`.
 
-## 1. Identity and role assignments
-
-Only `rg-shared-prod` needs to exist first.
+## CD identity
 
 ```powershell
 $sub = az account show --query id -o tsv
+$rg = "/subscriptions/$sub/resourceGroups/rg-grabreu-prod-brs"
 
-az identity create `
-  --name id-<project>-api-gha-prod `
-  --resource-group rg-shared-prod
-
-$identity = az identity show `
-  --name id-<project>-api-gha-prod `
-  --resource-group rg-shared-prod `
+az identity create --name id-<project>-cd-prod-brs --resource-group rg-grabreu-prod-brs
+$cd = az identity show --name id-<project>-cd-prod-brs --resource-group rg-grabreu-prod-brs `
   --query "{clientId:clientId, principalId:principalId}" -o json | ConvertFrom-Json
 
-az role assignment create `
-  --assignee-object-id $identity.principalId `
-  --assignee-principal-type ServicePrincipal `
-  --role "Contributor" `
-  --scope "/subscriptions/$sub/resourceGroups/rg-shared-prod/providers/Microsoft.App/containerApps/ca-<project>-api-prod"
+az role assignment create --assignee-object-id $cd.principalId --assignee-principal-type ServicePrincipal `
+  --role "Contributor" --scope "$rg/providers/Microsoft.App/containerApps/ca-<project>-api-prod-brs"
 
-az role assignment create `
-  --assignee-object-id $identity.principalId `
-  --assignee-principal-type ServicePrincipal `
-  --role "Contributor" `
-  --scope "/subscriptions/$sub/resourceGroups/rg-shared-prod/providers/Microsoft.App/jobs/caj-<project>-migration-prod"
+$repo = Invoke-RestMethod "https://api.github.com/repos/grabreu/<project>"
+$subject = "repo:grabreu@$($repo.owner.id)/<project>@$($repo.id)"
+
+az identity federated-credential create --name gha-main --identity-name id-<project>-cd-prod-brs `
+  --resource-group rg-grabreu-prod-brs --issuer "https://token.actions.githubusercontent.com" `
+  --subject "$($subject):ref:refs/heads/main" --audiences "api://AzureADTokenExchange"
+
+az identity federated-credential create --name gha-prod --identity-name id-<project>-cd-prod-brs `
+  --resource-group rg-grabreu-prod-brs --issuer "https://token.actions.githubusercontent.com" `
+  --subject "$($subject):environment:prod" --audiences "api://AzureADTokenExchange"
 ```
 
-Scope each role assignment to the specific resource, not to `rg-shared-prod`: the resource group also holds the shared Container Apps environment, the shared SQL Server, and other projects' resources.
+The `prod` GitHub Environment must exist with that exact name.
 
-## 2. Federated credential
+| Variable | Level | Value |
+|---|---|---|
+| `AZURE_TENANT_ID` | Repository | `az account show --query tenantId -o tsv` |
+| `AZURE_SUBSCRIPTION_ID` | Repository | `$sub` |
+| `AZURE_CLIENT_ID` | Repository | `$cd.clientId` |
+| `ACR_NAME` | Repository | `crgrabreuprod` |
+| `CONTAINER_APP_NAME` | Environment `prod` | `ca-<project>-api-prod-brs` |
+| `RESOURCE_GROUP` | Environment `prod` | `rg-grabreu-prod-brs` |
 
-Subject uses the immutable, ID-based format (survives a repo rename or transfer, unlike the plain name-based one):
+## Registry access
+
+TODO: not yet verified end to end.
 
 ```powershell
-$repo = Invoke-RestMethod "https://api.github.com/repos/grabreu/<project>"
-$ownerId = $repo.owner.id
-$repoId = $repo.id
+$acrId = az acr show --name crgrabreuprod --query id -o tsv
+$app = az containerapp show --name ca-<project>-api-prod-brs --resource-group rg-grabreu-prod-brs --query identity.principalId -o tsv
 
-az identity federated-credential create `
-  --name gha-api-prod `
-  --identity-name id-<project>-api-gha-prod `
-  --resource-group rg-shared-prod `
-  --issuer "https://token.actions.githubusercontent.com" `
-  --subject "repo:grabreu@$ownerId/<project>@$repoId:environment:api-prod" `
-  --audiences "api://AzureADTokenExchange"
+az role assignment create --assignee-object-id $cd.principalId --assignee-principal-type ServicePrincipal --role "AcrPush" --scope $acrId
+az role assignment create --assignee-object-id $app --assignee-principal-type ServicePrincipal --role "AcrPull" --scope $acrId
 ```
 
-The GitHub Environment (`api-prod`, no region segment; see `docs/adr/0003-naming-convention.md` for why not) must already exist with that exact name, or the subject never matches, and the login fails without an error at federated-credential creation time, only when the workflow actually tries to authenticate.
+The Container App is created with a public placeholder image (`mcr.microsoft.com/k8se/quickstart:latest`), since its identity has no `AcrPull` until this step.
 
-Register in that Environment's secrets: `AZURE_CLIENT_ID` (`$identity.clientId`), `AZURE_TENANT_ID` (`az account show --query tenantId -o tsv`), `AZURE_SUBSCRIPTION_ID` (`$sub`).
+## SQL grants
 
-## 3. SQL grants
+Run in the Query editor of `sqldb-<project>` with your Entra account. The identity that migrates needs `db_datareader`/`db_datawriter` too, for `__EFMigrationsHistory`.
 
-Run in the Query editor of the project's database (`sqldb-<project>-prod`, inside `sql-shared-prod-grabreu`), authenticated with your own Entra account.
+Migrations on API startup (`crew-tasks`):
 
 ```sql
-CREATE USER [ca-<project>-api-prod] FROM EXTERNAL PROVIDER;
-ALTER ROLE db_datareader ADD MEMBER [ca-<project>-api-prod];
-ALTER ROLE db_datawriter ADD MEMBER [ca-<project>-api-prod];
-
-CREATE USER [caj-<project>-migration-prod] FROM EXTERNAL PROVIDER;
-ALTER ROLE db_ddladmin ADD MEMBER [caj-<project>-migration-prod];
-ALTER ROLE db_datareader ADD MEMBER [caj-<project>-migration-prod];
-ALTER ROLE db_datawriter ADD MEMBER [caj-<project>-migration-prod];
+CREATE USER [ca-<project>-api-prod-brs] FROM EXTERNAL PROVIDER;
+ALTER ROLE db_ddladmin ADD MEMBER [ca-<project>-api-prod-brs];
+ALTER ROLE db_datareader ADD MEMBER [ca-<project>-api-prod-brs];
+ALTER ROLE db_datawriter ADD MEMBER [ca-<project>-api-prod-brs];
 ```
 
-`db_ddladmin` alone applies schema changes but can't read or write `__EFMigrationsHistory`, which EF Core needs to track which migrations already ran; confirmed the hard way, `dotnet ef migrations bundle` fails with "The SELECT permission was denied on the object '__EFMigrationsHistory'" without `db_datareader`/`db_datawriter` too.
-
-`FROM EXTERNAL PROVIDER` resolves by name against Entra ID; no object ID needed in the statement. To confirm a grant matches the identity you expect:
-
-```sql
-SELECT name, type_desc, authentication_type_desc
-FROM sys.database_principals
-WHERE name IN ('ca-<project>-api-prod', 'caj-<project>-migration-prod');
-```
+Migrations in a separate Job (`caj-<project>-migration-prod-brs`): the API gets only `db_datareader`/`db_datawriter`, the Job gets all three. The Job also needs `Contributor` for the CD identity and `AcrPull` for its own identity, same as the Container App.

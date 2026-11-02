@@ -1,9 +1,13 @@
 @description('Location for the Container Apps environment.')
 param location string
 
+@description('Tags applied to every resource.')
+param tags object
+
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2026-03-01' = {
-  name: 'log-shared-prod'
+  name: 'log-grabreu-prod-brs'
   location: location
+  tags: tags
   properties: {
     sku: {
       name: 'PerGB2018'
@@ -13,8 +17,9 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2026-03-01' = {
 }
 
 resource cae 'Microsoft.App/managedEnvironments@2026-01-01' = {
-  name: 'cae-shared-prod'
+  name: 'cae-grabreu-prod-brs'
   location: location
+  tags: tags
   properties: {
     publicNetworkAccess: 'Enabled'
     peerAuthentication: {

@@ -7,9 +7,13 @@ param aadAdminObjectId string
 @description('Microsoft Entra login/UPN of the initial server administrator.')
 param aadAdminLogin string
 
+@description('Tags applied to every resource.')
+param tags object
+
 resource sqlServer 'Microsoft.Sql/servers@2025-08-01-preview' = {
-  name: 'sql-shared-prod-grabreu'
+  name: 'sql-grabreu-prod-brs'
   location: location
+  tags: tags
   properties: {
     administrators: {
       administratorType: 'ActiveDirectory'
