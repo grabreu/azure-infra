@@ -30,7 +30,7 @@ az deployment sub what-if --location brazilsouth --template-file main.bicep --pa
 az deployment sub create --location brazilsouth --template-file main.bicep --parameters main.bicepparam
 ```
 
-CI builds the templates on every PR and posts the `what-if` result as a comment.
+CI only builds the templates; nothing is applied from GitHub.
 
 ## License
 
