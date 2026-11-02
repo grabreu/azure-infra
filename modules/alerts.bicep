@@ -7,11 +7,15 @@ param logAnalyticsWorkspaceId string
 @description('Email address to notify when the ingestion alert fires.')
 param notificationEmail string
 
+@description('Tags applied to every resource.')
+param tags object
+
 resource actionGroup 'Microsoft.Insights/actionGroups@2024-10-01-preview' = {
-  name: 'ag-shared-prod'
+  name: 'ag-grabreu-prod-brs'
   location: 'global'
+  tags: tags
   properties: {
-    groupShortName: 'sharedalert'
+    groupShortName: 'grabreualert'
     enabled: true
     emailReceivers: [
       {
@@ -24,11 +28,12 @@ resource actionGroup 'Microsoft.Insights/actionGroups@2024-10-01-preview' = {
 }
 
 resource ingestionAlert 'Microsoft.Insights/scheduledQueryRules@2026-03-01' = {
-  name: 'alert-shared-prod-log-ingestion'
+  name: 'alert-grabreu-prod-brs'
   location: location
+  tags: tags
   properties: {
     displayName: 'Log Analytics ingestion approaching free limit'
-    description: 'Fires when billable data ingested into log-shared-prod over the last 30 days is at or above 4 GB, ahead of the 5 GB/month free allowance (per billing account).'
+    description: 'Fires when billable data ingested into log-grabreu-prod-brs over the last 30 days is at or above 4 GB, ahead of the 5 GB/month free allowance (per billing account).'
     severity: 2
     enabled: true
     scopes: [

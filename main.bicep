@@ -5,9 +5,19 @@ param aadAdminLogin string
 param aadAdminObjectId string
 param notificationEmail string
 
+var tags = {
+  project: 'platform'
+  env: 'prod'
+  owner: 'grabreu'
+}
+
 resource rg 'Microsoft.Resources/resourceGroups@2025-04-01' = {
-  name: 'rg-shared-prod'
+  name: 'rg-grabreu-prod-brs'
   location: location
+  tags: {
+    env: tags.env
+    owner: tags.owner
+  }
 }
 
 module cae 'modules/cae.bicep' = {
@@ -15,6 +25,7 @@ module cae 'modules/cae.bicep' = {
   scope: resourceGroup(rg.name)
   params: {
     location: location
+    tags: tags
   }
 }
 
@@ -23,8 +34,30 @@ module sql 'modules/sql.bicep' = {
   scope: resourceGroup(rg.name)
   params: {
     location: location
+    tags: tags
     aadAdminLogin: aadAdminLogin
     aadAdminObjectId: aadAdminObjectId
+  }
+}
+
+module acr 'modules/acr.bicep' = {
+  name: 'acr-deploy'
+  scope: resourceGroup(rg.name)
+  params: {
+    location: location
+    tags: tags
+  }
+}
+
+module policy 'modules/policy.bicep' = {
+  name: 'policy-deploy'
+  scope: resourceGroup(rg.name)
+  params: {
+    location: location
+    inheritedTagNames: [
+      'env'
+      'owner'
+    ]
   }
 }
 
@@ -33,6 +66,7 @@ module alerts 'modules/alerts.bicep' = {
   scope: resourceGroup(rg.name)
   params: {
     location: location
+    tags: tags
     logAnalyticsWorkspaceId: cae.outputs.logAnalyticsId
     notificationEmail: notificationEmail
   }

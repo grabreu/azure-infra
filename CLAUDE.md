@@ -2,7 +2,7 @@
 
 ## Repository
 
-Shared Azure infrastructure (Bicep) for my projects: resource group, Container Apps environment, SQL Server, and other resources reused across multiple projects (`shared-todo`, future ones). Per-project resources (an app's own Container App, Container Apps Job, database, Static Web App) are not provisioned here; they live in each app repo's own `infra/` folder, referencing what this repo provisions.
+Shared Azure infrastructure (Bicep) for my projects: resource group, Container Apps environment, SQL Server, and other resources reused across multiple projects (`crew-tasks`, future ones). Per-project resources (an app's own Container App, Container Apps Job, database, Static Web App) are not provisioned here; they live in each app repo's own `infra/` folder, referencing what this repo provisions.
 
 Read `README.md` before making changes: it documents what this repo provisions and how consuming repos reference it. Check `docs/adr/` before revisiting a past decision (Bicep over Terraform, the shared/per-project boundary, the naming convention, SQL Server auth).
 
@@ -46,7 +46,7 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 
 - `main.bicep` - entry point (subscription scope): creates/adopts the resource group, calls each module scoped into it.
 - `main.bicepparam` - parameter values for `main.bicep` (no secrets; the SQL admin's Entra login/object ID are identifiers, not credentials).
-- `modules/` - one Bicep file per resource type (`cae.bicep`, `sql.bicep`, `alerts.bicep`); `cae.bicep` also creates the Log Analytics workspace it depends on.
+- `modules/` - one Bicep file per resource type (`acr.bicep`, `cae.bicep`, `sql.bicep`, `alerts.bicep`, `policy.bicep`); `cae.bicep` also creates the Log Analytics workspace it depends on.
 - `docs/adr/` - significant, hard-to-reverse decisions.
 - `docs/bootstrap-project-identity.md` - how to create a project's CD identity, role assignments, federated credential, and SQL grants; repeated for every new project.
 

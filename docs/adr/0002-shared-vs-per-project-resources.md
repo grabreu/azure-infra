@@ -1,7 +1,7 @@
-# This repo owns only resources shared across projects; per-project resources live in each app repo
+# Shared resources here, per-project resources in each project repo
 
-This repo provisions the resource group, Container Apps environment, Log Analytics workspace, and SQL Server: resources reused by multiple projects (`shared-todo`, future ones). A project's own Container App, Container Apps Job, database, and Static Web App are not provisioned here; they're declared in that project's own `infra/`, referencing what this repo provisions as `existing` resources.
+This repo provisions what multiple projects reuse: resource group, Container Registry, Container Apps environment, Log Analytics, SQL Server. A project's Container App, Job, and database live in its own `infra/`, referencing these as `existing`.
 
-The alternative considered was one repo per project owning everything, including a duplicate Container Apps environment and SQL Server per project.
+Alternative: each project owning its own environment and SQL Server, duplicating cost.
 
-**Consequences**: a consuming repo's `infra/` depends on the resource names this repo produces; renaming a shared resource here means coordinating the change across every consuming repo.
+**Consequences**: renaming a shared resource means updating every project's `infra/`.
