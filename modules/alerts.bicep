@@ -4,7 +4,7 @@ param location string
 @description('Resource ID of the Log Analytics workspace to monitor.')
 param logAnalyticsWorkspaceId string
 
-@description('Email address to notify when the ingestion alert fires.')
+@description('Email address to notify when an alert fires.')
 param notificationEmail string
 
 @description('Tags applied to every resource.')
@@ -49,6 +49,38 @@ resource ingestionAlert 'Microsoft.Insights/scheduledQueryRules@2026-03-01' = {
           metricMeasureColumn: 'DataGB'
           operator: 'GreaterThanOrEqual'
           threshold: 4
+        }
+      ]
+    }
+    actions: {
+      actionGroups: [
+        actionGroup.id
+      ]
+    }
+  }
+}
+
+resource errorAlert 'Microsoft.Insights/scheduledQueryRules@2026-03-01' = {
+  name: 'alert-grabreu-errors-prod-brs'
+  location: location
+  tags: tags
+  properties: {
+    displayName: 'Container App logged an error'
+    description: 'Fires when any app in the Container Apps environment writes an error-level console log line (unhandled exceptions, failed email sends, database command failures) in the last 15 minutes.'
+    severity: 2
+    enabled: true
+    scopes: [
+      logAnalyticsWorkspaceId
+    ]
+    evaluationFrequency: 'PT15M'
+    windowSize: 'PT15M'
+    criteria: {
+      allOf: [
+        {
+          query: 'ContainerAppConsoleLogs_CL | where Log_s startswith "fail:" or Log_s startswith "crit:"'
+          timeAggregation: 'Count'
+          operator: 'GreaterThanOrEqual'
+          threshold: 1
         }
       ]
     }

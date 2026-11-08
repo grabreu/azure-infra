@@ -4,6 +4,7 @@ param location string = 'brazilsouth'
 param aadAdminLogin string
 param aadAdminObjectId string
 param notificationEmail string
+param budgetAmount int
 
 var tags = {
   project: 'platform'
@@ -69,5 +70,15 @@ module alerts 'modules/alerts.bicep' = {
     tags: tags
     logAnalyticsWorkspaceId: cae.outputs.logAnalyticsId
     notificationEmail: notificationEmail
+  }
+}
+
+module budget 'modules/budget.bicep' = {
+  name: 'budget-deploy'
+  params: {
+    amount: budgetAmount
+    contactEmails: [
+      notificationEmail
+    ]
   }
 }
