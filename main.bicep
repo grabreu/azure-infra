@@ -50,6 +50,15 @@ module acr 'modules/acr.bicep' = {
   }
 }
 
+module storage 'modules/storage.bicep' = {
+  name: 'storage-deploy'
+  scope: resourceGroup(rg.name)
+  params: {
+    location: location
+    tags: tags
+  }
+}
+
 module policy 'modules/policy.bicep' = {
   name: 'policy-deploy'
   scope: resourceGroup(rg.name)
