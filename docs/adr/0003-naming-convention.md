@@ -2,12 +2,12 @@
 
 Names follow `<type>-<workload>[-<component>]-<env>-<region>`:
 
-- `<type>`: `rg`, `cr`, `log`, `appi`, `cae`, `ca`, `caj`, `sql`, `sqldb`, `kv`, `id`, `ag`, `alert`, `budget`.
+- `<type>`: `rg`, `cr`, `log`, `appi`, `cae`, `ca`, `caj`, `sql`, `sqldb`, `st`, `kv`, `id`, `ag`, `alert`, `budget`.
 - `<workload>`: `grabreu` for shared resources, the project name otherwise, without hyphens (`crewtasks`).
 - `<component>`: the publishable or role, when needed (`api`, `worker`, `migration`, `cd`).
 - `<env>`: `prod`. `<region>`: `brs`.
 
-Exceptions: the Container Registry has no hyphens (`crgrabreuprod`); databases drop env and region (`sqldb-crewtasks`). Length limits: Key Vault 24, Container App 32.
+Exceptions: the Container Registry and the Storage account have no hyphens (`crgrabreuprod`, `stgrabreuprodbrs`); databases drop env and region (`sqldb-crewtasks`); storage tables start with the project's workload (`prontowatchalertstate`). Length limits: Key Vault 24, Storage account 24, Container App 32.
 
 Everything lives in one resource group, so tags separate projects:
 

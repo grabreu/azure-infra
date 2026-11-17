@@ -50,7 +50,7 @@ az role assignment create --assignee-object-id $cd.principalId --assignee-princi
 az role assignment create --assignee-object-id $app --assignee-principal-type ServicePrincipal --role "AcrPull" --scope $acrId
 ```
 
-The Container App is created with a public placeholder image (`mcr.microsoft.com/k8se/quickstart:latest`), since its identity has no `AcrPull` until this step.
+The Container App is created with a public placeholder image (`mcr.microsoft.com/k8se/quickstart:latest`) and without a `registries` block, since its identity has no `AcrPull` until this step (see [ADR 0002](adr/0002-shared-vs-per-project-resources.md)).
 
 ## SQL grants
 
