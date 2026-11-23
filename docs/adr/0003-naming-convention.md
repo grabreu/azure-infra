@@ -2,7 +2,7 @@
 
 Names follow `<type>-<workload>[-<component>]-<env>-<region>`:
 
-- `<type>`: `rg`, `cr`, `log`, `appi`, `cae`, `ca`, `caj`, `sql`, `sqldb`, `st`, `kv`, `id`, `ag`, `alert`, `budget`.
+- `<type>`: `rg`, `cr`, `log`, `appi`, `cae`, `ca`, `caj`, `sql`, `sqldb`, `st`, `kv`, `id`, `ais`, `ag`, `alert`, `budget`.
 - `<workload>`: `grabreu` for shared resources, the project name otherwise, without hyphens (`crewtasks`).
 - `<component>`: the publishable or role, when needed (`api`, `worker`, `migration`, `cd`).
 - `<env>`: `prod`. `<region>`: `brs`.
