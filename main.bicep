@@ -59,6 +59,15 @@ module storage 'modules/storage.bicep' = {
   }
 }
 
+module foundry 'modules/foundry.bicep' = {
+  name: 'foundry-deploy'
+  scope: resourceGroup(rg.name)
+  params: {
+    location: location
+    tags: tags
+  }
+}
+
 module policy 'modules/policy.bicep' = {
   name: 'policy-deploy'
   scope: resourceGroup(rg.name)
