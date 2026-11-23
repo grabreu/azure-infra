@@ -17,6 +17,7 @@ All in `rg-grabreu-prod-brs`, tagged `project=platform`, `env=prod`, `owner=grab
 | SQL Server (Entra-only)                                                                                               | `sql-grabreu-prod-brs`                 |
 | Storage account (shared key access disabled; one table per project)                                                   | `stgrabreuprodbrs`                     |
 | Foundry account (Entra-only, no API keys; `gpt-4.1-nano` GlobalStandard deployment shared by all projects)            | `ais-grabreu-prod-brs`                 |
+| Key Vault (RBAC authorization, soft delete 7 days, purge protection off, public network access)                       | `kv-grabreu-prod-brs`                  |
 | Action group                                                                                                          | `ag-grabreu-prod-brs`                  |
 | Log ingestion alert (4 GB of the 5 GB free monthly allowance)                                                         | `alert-grabreu-prod-brs`               |
 | Error alert (any `fail:` or `crit:` console log line from a Container App, 15-minute window)                          | `alert-grabreu-errors-prod-brs`        |

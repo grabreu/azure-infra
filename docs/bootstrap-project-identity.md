@@ -1,6 +1,6 @@
 # Project bootstrap
 
-Manual setup for a new project (`crew-tasks`, ...): CD identity, registry access, SQL grants. Replace `<project>`.
+Manual setup for a new project (`crew-tasks`, ...): CD identity, registry access, SQL grants, and access to the shared Foundry account and Key Vault when the project uses them. Replace `<project>`.
 
 ## CD identity
 
@@ -51,6 +51,31 @@ az role assignment create --assignee-object-id $app --assignee-principal-type Se
 ```
 
 The Container App is created with a public placeholder image (`mcr.microsoft.com/k8se/quickstart:latest`) and without a `registries` block, since its identity has no `AcrPull` until this step (see [ADR 0002](adr/0002-shared-vs-per-project-resources.md)).
+
+## Foundry access
+
+TODO: not yet verified end to end. Only for projects that call the model. The account has local auth disabled, so the app authenticates with its identity (`DefaultAzureCredential`).
+
+```powershell
+$app = az containerapp show --name ca-<project>-api-prod-brs --resource-group rg-grabreu-prod-brs --query identity.principalId -o tsv
+$foundryId = az cognitiveservices account show --name ais-grabreu-prod-brs --resource-group rg-grabreu-prod-brs --query id -o tsv
+
+az role assignment create --assignee-object-id $app --assignee-principal-type ServicePrincipal --role "Cognitive Services OpenAI User" --scope $foundryId
+```
+
+Endpoint: `https://ais-grabreu-prod-brs.openai.azure.com/`; deployment: `gpt-4.1-nano`. A Foundry project is only needed for agents or the Foundry portal; it lives in the project's own `infra/`.
+
+## Key Vault access
+
+TODO: not yet verified end to end. Only for projects that read secrets. The vault uses RBAC, so the identity needs a data-plane role (Owner on the subscription is not enough).
+
+```powershell
+$kvId = az keyvault show --name kv-grabreu-prod-brs --resource-group rg-grabreu-prod-brs --query id -o tsv
+
+az role assignment create --assignee-object-id $app --assignee-principal-type ServicePrincipal --role "Key Vault Secrets User" --scope $kvId
+```
+
+The role can only be created after the app exists (its identity has to exist first), as with the registry (see [ADR 0002](adr/0002-shared-vs-per-project-resources.md)). TODO: check whether a Container App secret that references the vault (`keyVaultUrl` with `identity: system`) must wait for a second deployment. To write secrets yourself, grant your user `Key Vault Secrets Officer` on the vault.
 
 ## SQL grants
 
