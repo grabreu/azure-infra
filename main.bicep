@@ -68,6 +68,15 @@ module foundry 'modules/foundry.bicep' = {
   }
 }
 
+module kv 'modules/kv.bicep' = {
+  name: 'kv-deploy'
+  scope: resourceGroup(rg.name)
+  params: {
+    location: location
+    tags: tags
+  }
+}
+
 module policy 'modules/policy.bicep' = {
   name: 'policy-deploy'
   scope: resourceGroup(rg.name)

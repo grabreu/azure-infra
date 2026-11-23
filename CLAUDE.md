@@ -46,7 +46,7 @@ Future-you revisiting this months later, or someone browsing the portfolio to se
 
 - `main.bicep` - entry point (subscription scope): creates/adopts the resource group, calls each module scoped into it.
 - `main.bicepparam` - parameter values for `main.bicep` (no secrets; the SQL admin's Entra login/object ID are identifiers, not credentials).
-- `modules/` - one Bicep file per resource type (`acr.bicep`, `cae.bicep`, `sql.bicep`, `alerts.bicep`, `policy.bicep`); `cae.bicep` also creates the Log Analytics workspace it depends on.
+- `modules/` - one Bicep file per resource type (`acr.bicep`, `cae.bicep`, `sql.bicep`, `storage.bicep`, `foundry.bicep`, `kv.bicep`, `alerts.bicep`, `budget.bicep`, `policy.bicep`); `cae.bicep` also creates the Log Analytics workspace it depends on.
 - `docs/adr/` - significant, hard-to-reverse decisions.
 - `docs/bootstrap-project-identity.md` - how to create a project's CD identity, role assignments, federated credential, and SQL grants; repeated for every new project.
 
